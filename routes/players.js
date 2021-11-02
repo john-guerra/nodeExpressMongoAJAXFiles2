@@ -3,26 +3,42 @@ console.log("running players.js");
 let express = require("express");
 let router = express.Router();
 
-const playersStub = [
-  { name: "John", age: 13 },
-  { name: "Paola", age: 23 },
-];
+const myDB = require("../db/myMongoDB.js");
 
-router.get("/", function (req, res) {
-  res.json(playersStub);
+// const playersStub = [
+//   { name: "John", age: 13 },
+//   { name: "Paola", age: 23 },
+// ];
+
+// /players should return a list of the players
+router.get("/", async function (req, res) {
+  // get players from the db
+
+  const players = await myDB.getPlayers();
+  const playersCount = await myDB.getPlayersCount();
+
+
+  console.log("got players", players);
+
+  res.json( { players: players, playersCount} );
 });
 
+router.post("/create", async (req, res) => {
+  const body = req.body;
+  console.log("create player", body);
 
-router.post("/create", (req, res) => {
+  // if (! ["Male", "Female"].includes(body.gender)) {
 
-  const player = req.body;
-  console.log("create player", player);
+  // }
+  const newPlayer = {
+    name: body.name,
+    gender: body.gender
+  };
 
-  playersStub.push({name: player.name});
-
+  const mongoRes = await myDB.createPlayer(newPlayer);
+  console.log("Player created", mongoRes);
 
   res.redirect("/");
-
 });
 
 module.exports = router;
